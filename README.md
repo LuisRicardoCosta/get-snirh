@@ -1,10 +1,24 @@
 # get-snirh
 
+[![PyPI version](https://badge.fury.io/py/get-snirh.svg)](https://badge.fury.io/py/get-snirh)
+[![Tests](https://github.com/rhugman/get-snirh/actions/workflows/test.yml/badge.svg)](https://github.com/rhugman/get-snirh/actions/workflows/test.yml)
+[![Downloads](https://static.pepy.tech/badge/get-snirh)](https://pepy.tech/project/get-snirh)
+
 A Python package to automate the retrieval of water resource data from the Portuguese Environment Agency (SNIRH).
 
 ## Installation
 
+Install from PyPI:
+
 ```bash
+pip install get-snirh
+```
+
+Or install from source:
+
+```bash
+git clone https://github.com/rhugman/get-snirh.git
+cd get-snirh
 pip install .
 ```
 
