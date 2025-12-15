@@ -30,7 +30,7 @@ class TestPerformance(unittest.TestCase):
         """
         # 1. Run with 1 worker (Sequential)
         start_time = time.time()
-        self.snirh.data.get_timeseries(
+        df_1 = self.snirh.data.get_timeseries(
             station_codes=self.stations,
             parameter=Parameters.GWL_DEPTH,
             start_date='01/01/2024',
@@ -39,10 +39,13 @@ class TestPerformance(unittest.TestCase):
         )
         duration_1 = time.time() - start_time
         logger.info(f"Duration with 1 worker: {duration_1:.2f}s")
+        
+        # Ensure we actually got data, otherwise the test is meaningless
+        self.assertFalse(df_1.empty, "Sequential fetch returned no data. Check network/server status.")
 
         # 2. Run with 10 workers (Concurrent)
         start_time = time.time()
-        self.snirh.data.get_timeseries(
+        df_10 = self.snirh.data.get_timeseries(
             station_codes=self.stations,
             parameter=Parameters.GWL_DEPTH,
             start_date='01/01/2024',
@@ -51,6 +54,9 @@ class TestPerformance(unittest.TestCase):
         )
         duration_10 = time.time() - start_time
         logger.info(f"Duration with 10 workers: {duration_10:.2f}s")
+        
+        # Ensure we actually got data
+        self.assertFalse(df_10.empty, "Concurrent fetch returned no data. Check network/server status.")
 
         # Assert speedup
         # We expect at least 2x speedup (conservative estimate due to overhead/network latency)
