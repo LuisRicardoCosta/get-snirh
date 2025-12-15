@@ -109,6 +109,9 @@ class DataFetcher:
                 print(f"Error fetching data for station {code}: {e}")
                 continue
 
+        # Filter out empty DataFrames
+        all_dfs = [df for df in all_dfs if not df.empty]
+
         if not all_dfs:
             logger.warning("No data fetched for any station.")
             return pd.DataFrame(columns=['date', 'site_name', 'parameter', 'value'])
