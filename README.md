@@ -76,4 +76,4 @@ Available parameters in `get_snirh.Parameters`:
 
 ## License
 
-MIT
+GNU GPLv3
