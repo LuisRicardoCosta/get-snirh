@@ -21,7 +21,8 @@ class DataFetcher:
         station_codes: Union[List[str], Dict[str, str], pd.DataFrame], 
         parameter: Union[str, Parameters], 
         start_date: str, 
-        end_date: str
+        end_date: str,
+        max_workers: Optional[int] = None
     ) -> pd.DataFrame:
         """
         Fetches time-series data for a list of station codes (marker sites).
@@ -34,6 +35,8 @@ class DataFetcher:
             parameter: The parameter ID (string or Enum).
             start_date: Start date in 'dd/mm/yyyy' format.
             end_date: End date in 'dd/mm/yyyy' format.
+            max_workers: Maximum number of concurrent requests. 
+                         If None, defaults to min(10, len(stations)).
             
         Returns:
             pd.DataFrame: Concatenated data for all stations.
@@ -106,7 +109,17 @@ class DataFetcher:
                 logger.error("Error fetching data for station %s (code %s): %s", name, code, str(e))
                 return None
 
-        with ThreadPoolExecutor(max_workers=10) as executor:
+        # Determine max_workers if not provided
+        if max_workers is None:
+            # Default to min(10, number of stations) to avoid creating too many threads for few stations
+            # but cap at 10 to be polite to the server
+            max_workers = min(10, len(station_map))
+            # Ensure at least 1 worker
+            max_workers = max(1, max_workers)
+
+        logger.debug("Using %d workers for concurrent fetching", max_workers)
+
+        with ThreadPoolExecutor(max_workers=max_workers) as executor:
             future_to_station = {executor.submit(fetch_single, code, name): name for code, name in station_map.items()}
             for future in as_completed(future_to_station):
                 try:
