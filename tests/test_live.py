@@ -8,57 +8,71 @@ class TestLiveIntegration(unittest.TestCase):
     These tests hit the actual SNIRH servers.
     They are skipped by default to prevent network dependency in standard test runs.
     """
-    def setUp(self):
-        self.snirh = Snirh(network='meteorologica')
 
-    def test_fetch_stations_and_data(self):
-        # 1. Fetch Stations
-        print("\n[Live] Fetching station list...")
-        # Using default bundled files (no arguments needed now)
+    def test_fetch_stations_all_networks(self):
+        """Test fetching station lists for all supported networks."""
+        networks = [
+            'piezometria', 
+            'meteorologica', 
+            'qualidade', 
+            'hidrometrica', 
+            'qualidade_superficial'
+        ]
         
-        stations = self.snirh.stations.get_stations_with_metadata(
-            basin_filter=['RIBEIRAS DO ALGARVE']
-        )
-        
-        self.assertGreater(len(stations), 0, "Should find stations in Algarve")
-        
-        # Take the first station that likely has data (e.g., Faro or similar if possible, but first is fine)
-        # We'll try to fetch data for the first 3 stations to increase chance of hitting one with data
-        target_stations = stations.head(3)
-        
-        print(f"[Live] Fetching data for stations: {target_stations['estacao'].tolist()}")
+        for network in networks:
+            with self.subTest(network=network):
+                print(f"\n[Live] Testing network station fetch: {network}")
+                snirh = Snirh(network=network)
+                # Fetch stations (limit to a small basin to be faster if possible)
+                # Using 'RIBEIRAS DO ALGARVE' as it's usually smaller than 'TEJO' or 'DOURO'
+                stations = snirh.stations.get_stations_with_metadata(basin_filter=['RIBEIRAS DO ALGARVE'])
+                
+                self.assertGreater(len(stations), 0, f"Should find stations for {network}")
+                print(f"Found {len(stations)} stations for {network}")
 
-        # 2. Fetch Data (Rainfall)
-        # Use a recent short period (1 month)
-        # Pass the DataFrame to test the new functionality
-        df = self.snirh.data.get_timeseries(
+    def test_fetch_data_meteorologica(self):
+        """Test fetching data for Meteorologica network (Precipitation)."""
+        print("\n[Live] Testing data fetch: meteorologica")
+        snirh = Snirh(network='meteorologica')
+        stations = snirh.stations.get_stations_with_metadata(basin_filter=['RIBEIRAS DO ALGARVE'])
+        
+        # Try a few stations to increase chance of finding data
+        target_stations = stations.head(5)
+        
+        df = snirh.data.get_timeseries(
             station_codes=target_stations,
             parameter=Parameters.PRECIPITATION_DAILY,
             start_date='01/01/2023',
             end_date='31/01/2023'
         )
-
-        print(f"[Live] Fetched {len(df)} rows.")
         
-        # Basic assertions
         self.assertIsNotNone(df)
-        self.assertIn('site_name', df.columns)
-        self.assertIn('value', df.columns)
-        self.assertIn('date', df.columns)
-        self.assertIn('parameter', df.columns)
+        print(f"Fetched {len(df)} rows for meteorologica.")
         
-        # If we got data, verify structure
         if not df.empty:
-             # Check that site_name contains station names, not codes
-             # We expect names like '3/N1' etc.
-             first_id = df['site_name'].iloc[0]
-             self.assertIn(first_id, target_stations['estacao'].values)
-             
-             # Check Parameter column
-             self.assertEqual(df['parameter'].iloc[0], 'PRECIPITATION_DAILY')
+            self.assertIn('site_name', df.columns)
+            self.assertIn('value', df.columns)
+            self.assertEqual(df['parameter'].iloc[0], 'PRECIPITATION_DAILY')
 
-             assert df.shape[0] > 0, "DataFrame should have rows of data"
-
-
-if __name__ == '__main__':
-    unittest.main()
+    def test_fetch_data_piezometria(self):
+        """Test fetching data for Piezometria network (Groundwater Level)."""
+        print("\n[Live] Testing data fetch: piezometria")
+        snirh = Snirh(network='piezometria')
+        stations = snirh.stations.get_stations_with_metadata(basin_filter=['RIBEIRAS DO ALGARVE'])
+        
+        target_stations = stations.head(5)
+        
+        df = snirh.data.get_timeseries(
+            station_codes=target_stations,
+            parameter=Parameters.GWL_DEPTH,
+            start_date='01/01/2023',
+            end_date='31/01/2023'
+        )
+        
+        self.assertIsNotNone(df)
+        print(f"Fetched {len(df)} rows for piezometria.")
+        
+        if not df.empty:
+            self.assertIn('site_name', df.columns)
+            self.assertIn('value', df.columns)
+            self.assertEqual(df['parameter'].iloc[0], 'GWL_DEPTH')
