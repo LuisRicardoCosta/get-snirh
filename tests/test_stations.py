@@ -61,7 +61,7 @@ CÓDIGO,BACIA,RIO
         df = self.fetcher.get_all_stations(use_web=True)
 
         self.assertEqual(len(df), 2)
-        self.assertEqual(df.iloc[0]['CÓDIGO'], 123)
+        self.assertEqual(df.iloc[0]['CÓDIGO'], '123')
         self.assertEqual(df.iloc[0]['BACIA'], 'RIBEIRAS DO ALGARVE')
 
     def test_get_stations_with_metadata_filtered(self):

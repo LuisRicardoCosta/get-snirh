@@ -81,7 +81,7 @@ class StationFetcher:
                     # Read from local file
                     # Try reading as standard CSV first (clean format)
                     try:
-                        df = pd.read_csv(file_path, encoding='ISO-8859-1')
+                        df = pd.read_csv(file_path, encoding='ISO-8859-1', dtype={'CÓDIGO': str, 'CDIGO': str})
                         df = normalize_cols(df)
                         if 'BACIA' in df.columns:
                              logger.debug("Successfully read clean CSV")
@@ -94,7 +94,7 @@ class StationFetcher:
                     
                     # Try skiprows=4 first (common in local files)
                     try:
-                        df = pd.read_csv(file_path, sep=',', skiprows=4, index_col=False, encoding='ISO-8859-1')
+                        df = pd.read_csv(file_path, sep=',', skiprows=4, index_col=False, encoding='ISO-8859-1', dtype={'CÓDIGO': str, 'CDIGO': str})
                         df = normalize_cols(df)
                         if 'CÓDIGO' in df.columns:
                              pass
@@ -103,7 +103,7 @@ class StationFetcher:
                     except Exception:
                         # Try skiprows=3
                         logger.debug("Fallback to skiprows=3")
-                        df = pd.read_csv(file_path, sep=',', skiprows=3, index_col=False, encoding='ISO-8859-1')
+                        df = pd.read_csv(file_path, sep=',', skiprows=3, index_col=False, encoding='ISO-8859-1', dtype={'CÓDIGO': str, 'CDIGO': str})
                         df = normalize_cols(df)
                     
                     # Clean up potential garbage rows (e.g. footer text appearing as data)
@@ -116,7 +116,7 @@ class StationFetcher:
             url = f"{SnirhUrls.STATION_LIST_CSV}?obj_janela=INFO_ESTACOES&s_cover={s_cover}&tp_lista=&completa=1&formato=csv"
             csv_buffer = self.client.fetch_csv(url)
             # Skip initial rows as per notebook
-            df = pd.read_csv(csv_buffer, sep=',', skiprows=3, index_col=False)
+            df = pd.read_csv(csv_buffer, sep=',', skiprows=3, index_col=False, dtype={'CÓDIGO': str, 'CDIGO': str})
             
             # Clean up potential garbage rows (e.g. footer text appearing as data)
             if 'BACIA' in df.columns:
@@ -354,6 +354,10 @@ class StationFetcher:
         
         # So we merge df_meta['CÓDIGO'] with df_codes['code']
         
+        # Ensure code is string for merging
+        if 'code' in df_codes.columns:
+            df_codes['code'] = df_codes['code'].astype(str)
+
         merged = pd.merge(
             df_meta, 
             df_codes, 

@@ -1,6 +1,7 @@
 import requests
 import io
 import logging
+import threading
 from typing import Optional, Dict, Any
 from .constants import SnirhHeaders
 from .exceptions import SnirhNetworkError
@@ -14,9 +15,16 @@ class SnirhClient:
     """
 
     def __init__(self, headers: Optional[Dict[str, str]] = None):
-        self.session = requests.Session()
-        self.session.headers.update(headers or SnirhHeaders.DEFAULT)
-        logger.debug("SnirhClient initialized with headers: %s", self.session.headers)
+        self._headers = headers or SnirhHeaders.DEFAULT
+        self._local = threading.local()
+        logger.debug("SnirhClient initialized with headers: %s", self._headers)
+
+    @property
+    def session(self) -> requests.Session:
+        if not hasattr(self._local, "session"):
+            self._local.session = requests.Session()
+            self._local.session.headers.update(self._headers)
+        return self._local.session
 
     def fetch_csv(self, url: str) -> io.StringIO:
         """
