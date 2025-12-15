@@ -1,1 +1,79 @@
 # get-snirh
+
+A Python package to automate the retrieval of water resource data from the Portuguese Environment Agency (SNIRH).
+
+## Installation
+
+```bash
+pip install .
+```
+
+## Usage
+
+### Basic Example
+
+```python
+from get_snirh import Snirh, Parameters
+
+# Initialize the client for a specific network
+# Currently supported: "piezometria" (default), "meteorologica"
+snirh = Snirh(network="piezometria")
+
+# 1. Get Stations
+# Fetch all stations and filter by basin
+# This uses bundled metadata for fast access
+stations = snirh.stations.get_stations_with_metadata(basin_filter=['RIBEIRAS DO ALGARVE'])
+print(f"Found {len(stations)} stations.")
+
+# 2. Fetch Data
+# Fetch Groundwater Level Depth for the year 2023
+# Passing the stations DataFrame allows the output to include station names
+df = snirh.data.get_timeseries(
+    station_codes=stations.head(5), # Limit to first 5 for demo
+    parameter=Parameters.GWL_DEPTH,
+    start_date='01/01/2023',
+    end_date='31/12/2023'
+)
+
+print(df.head())
+
+# 3. Save to CSV
+df.to_csv('algarve_gwl_2023.csv', index=False)
+```
+
+## Testing
+
+To run the standard unit tests (mocked):
+```bash
+pytest
+```
+
+To run the live integration tests (hits SNIRH servers):
+```bash
+RUN_LIVE_TESTS=1 pytest tests/test_live.py
+```
+
+## Features & Limitations
+
+- **Supported Networks**: Currently fully supports **Piezometria** (Groundwater) and **Meteorologica** (Meteorology).
+- **Station Database**: Station lists are currently **limited to a hardcoded local database**. Remote access to the live station list is currently unresolved, so the bundled metadata files must be updated manually for now.
+- **Data Retrieval**: Downloads time-series data for various parameters (Rainfall, Groundwater Level, Temperature, etc.).
+- **Robust Parsing**: Handles SNIRH's specific CSV formats and encoding (ISO-8859-1).
+- **Clean API**: Simple, object-oriented interface.
+
+## Examples
+
+Check the `examples/` folder for more detailed usage scripts and notebooks.
+
+## Parameters
+
+Available parameters in `get_snirh.Parameters`:
+- `PRECIPITATION_DAILY`
+- `PRECIPITATION_MONTHLY`
+- `GWL_DEPTH`
+- `AIR_TEMP_AVG_DAILY`
+- And more...
+
+## License
+
+MIT
