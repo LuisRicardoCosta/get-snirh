@@ -88,6 +88,17 @@ Available parameters in `get_snirh.Parameters`:
 - `AIR_TEMP_AVG_DAILY`
 - And more...
 
+## Disclaimer & Data Acknowledgment
+
+This software is an unofficial tool and is **not** affiliated with, endorsed by, or maintained by the **Agência Portuguesa do Ambiente (APA)** or the **Sistema Nacional de Informação de Recursos Hídricos (SNIRH)**.
+
+All data retrieved by this tool belongs to SNIRH/APA. Users are responsible for adhering to SNIRH's terms of use and data policies. Please ensure you cite the source appropriately when using the data.
+
+- **Data Source**: [SNIRH - Sistema Nacional de Informação de Recursos Hídricos](https://snirh.apambiente.pt/)
+- **Owner**: Agência Portuguesa do Ambiente (APA)
+
+This tool is provided "as is", without warranty of any kind. Use it responsibly to avoid overloading the SNIRH servers.
+
 ## License
 
 GNU GPLv3
