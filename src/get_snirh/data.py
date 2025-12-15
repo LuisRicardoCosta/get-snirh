@@ -1,6 +1,7 @@
 import logging
 import pandas as pd
 from typing import List, Union, Dict, Optional
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from .client import SnirhClient
 from .constants import SnirhUrls, Parameters
 from .exceptions import SnirhNetworkError
@@ -64,7 +65,7 @@ class DataFetcher:
 
         all_dfs = []
 
-        for code, name in station_map.items():
+        def fetch_single(code, name):
             try:
                 logger.debug("Fetching data for station: %s (code: %s)", name, code)
                 url = (
@@ -99,15 +100,21 @@ class DataFetcher:
                 
                 # Reorder
                 df_temp = df_temp[['date', 'site_name', 'parameter', 'value']]
-
-                
-                all_dfs.append(df_temp)
-                
+                return df_temp
             except Exception as e:
                 # Log error but continue
                 logger.error("Error fetching data for station %s (code %s): %s", name, code, str(e))
-                print(f"Error fetching data for station {code}: {e}")
-                continue
+                return None
+
+        with ThreadPoolExecutor(max_workers=10) as executor:
+            future_to_station = {executor.submit(fetch_single, code, name): name for code, name in station_map.items()}
+            for future in as_completed(future_to_station):
+                try:
+                    result = future.result()
+                    if result is not None and not result.empty:
+                        all_dfs.append(result)
+                except Exception as e:
+                    logger.error("Unexpected error in thread: %s", str(e))
 
         # Filter out empty DataFrames
         all_dfs = [df for df in all_dfs if not df.empty]
