@@ -1,0 +1,13 @@
+name: get-snirh-dev
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - python>=3.8
+  - pandas>=1.0.0
+  - requests>=2.25.0
+  - pytest
+  - ipykernel
+  - pip
+  - pip:
+    - -e . 
