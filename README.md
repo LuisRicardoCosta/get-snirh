@@ -99,6 +99,12 @@ All data retrieved by this tool belongs to SNIRH/APA. Users are responsible for 
 
 This tool is provided "as is", without warranty of any kind. Use it responsibly to avoid overloading the SNIRH servers.
 
+## Citation
+
+If you use this software in your research, please cite it as:
+
+> Costa, L., & Hugman, R. (2025). get-snirh (Version 0.1.1) [Computer software]. https://github.com/rhugman/get-snirh
+
 ## License
 
 GNU GPLv3
