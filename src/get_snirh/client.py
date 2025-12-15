@@ -2,8 +2,6 @@ import requests
 import io
 import logging
 import threading
-from requests.adapters import HTTPAdapter
-from urllib3.util.retry import Retry
 from typing import Optional, Dict, Any
 from .constants import SnirhHeaders
 from .exceptions import SnirhNetworkError
@@ -26,19 +24,6 @@ class SnirhClient:
         if not hasattr(self._local, "session"):
             self._local.session = requests.Session()
             self._local.session.headers.update(self._headers)
-            
-            # Configure retries with backoff
-            # Retry on 403 (Forbidden), 429 (Too Many Requests), and 5xx errors
-            retries = Retry(
-                total=5,
-                backoff_factor=1, # 1s, 2s, 4s, 8s, 16s
-                status_forcelist=[403, 429, 500, 502, 503, 504],
-                allowed_methods=["GET"]
-            )
-            adapter = HTTPAdapter(max_retries=retries)
-            self._local.session.mount("https://", adapter)
-            self._local.session.mount("http://", adapter)
-            
         return self._local.session
 
     def fetch_csv(self, url: str) -> io.StringIO:

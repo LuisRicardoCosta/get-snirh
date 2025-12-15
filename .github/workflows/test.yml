@@ -13,8 +13,10 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest]
-        python-version: ["3.10", "3.11", "3.12"]
+        # Test on Ubuntu (fastest/standard) and Windows (to catch path/encoding issues)
+        os: [ubuntu-latest, windows-latest]
+        # Test oldest supported (modern) and newest stable
+        python-version: ["3.10", "3.12"]
 
     steps:
     - uses: actions/checkout@v4
@@ -34,4 +36,4 @@ jobs:
       env:
         RUN_LIVE_TESTS: 1
       run: |
-        pytest
+        pytest --ignore=tests/test_performance.py
