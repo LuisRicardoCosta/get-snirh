@@ -103,7 +103,7 @@ This tool is provided "as is", without warranty of any kind. Use it responsibly 
 
 If you use this software in your research, please cite it as:
 
-> Hugman, R., & Costa, L. (2025). get-snirh (Version 0.1.1) [Computer software]. https://github.com/rhugman/get-snirh
+> Costa, L., & Hugman, R. (2025). get-snirh (Version 0.1.1) [Computer software]. https://github.com/rhugman/get-snirh
 
 ## License
 
